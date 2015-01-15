@@ -34,7 +34,7 @@ public class DemoFace {
 		face_cascade.detectMultiScale(mGrey, faces);
 
 		int noOfFaces = faces.toArray().length;
-		System.out.println(String.format("Detected %s faces", noOfFaces));
+		//System.out.println(String.format("Detected %s faces", noOfFaces));
 		for (Rect rect : faces.toArray()) {
 			Point center = new Point(rect.x + rect.width * 0.5, rect.y + rect.height * 0.5);
 			Imgproc.rectangle(mRgba, new Point(rect.x, rect.y), new Point(rect.x + rect.width, rect.y
@@ -60,7 +60,7 @@ public class DemoFace {
 			MatOfRect faceDetections = new MatOfRect();
 			faceDetector.detectMultiScale(frame, faceDetections);
 
-			System.out.println(String.format("Detected %s faces", faceDetections.toArray().length));
+			//System.out.println(String.format("Detected %s faces", faceDetections.toArray().length));
 
 		}
 

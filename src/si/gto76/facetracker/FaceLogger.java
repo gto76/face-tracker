@@ -35,6 +35,23 @@ public class FaceLogger {
 
 		// for areas without the face create new face
 		createNewFacesForAreasWithoutAndUpdateOldOnes(nearestFaces);
+		
+		printAllFaces();
+	}
+
+	private void printAllFaces() {
+		for (Face face: faces) {
+			printFace(face);
+		}
+	}
+
+	private void printFace(Face face) {
+		System.out.println("#### face "+face.color.c.getBlue());
+		System.out.println("t "+face.lastSeen);
+		System.out.println("x "+face.area.x);
+		System.out.println("y "+face.area.y);
+		System.out.println("z "+face.area.area());
+		System.out.println();
 	}
 
 	private void removeOldFaces() {
@@ -74,8 +91,8 @@ public class FaceLogger {
 	private Double getDistance(Rect area, Face face) {
 		double dx = area.x - face.area.x;
 		double dy = area.y - face.area.y;
-		double dz = Math.sqrt(area.area() - face.area.area());
-		double dt = lastCycleTime - face.lastSeen;
+		double dz = (area.area() - face.area.area())/100;
+		double dt = (lastCycleTime - face.lastSeen)/10;
 		return Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2) + Math.pow(dz, 2) + Math.pow(dt, 2));
 	}
 
@@ -112,6 +129,7 @@ public class FaceLogger {
 		for (Rect rect : rects) {
 			if (nearestRect == null) {
 				nearestRect = rect;
+				nearestDistance = getDistance(rect, face);
 				continue;
 			}
 			double distance = getDistance(rect, face);

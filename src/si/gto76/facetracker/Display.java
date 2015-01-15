@@ -36,8 +36,8 @@ class Display extends JPanel {
 				.getDataBuffer()).getData();
 		System.arraycopy(sourcePixels, 0, targetPixels, 0, sourcePixels.length);
 		long endTime = System.nanoTime();
-		System.out.println(String.format("Elapsed time: %.2f ms",
-				(float) (endTime - startTime) / 1000000));
+		//System.out.println(String.format("Elapsed time: %.2f ms",
+		//		(float) (endTime - startTime) / 1000000));
 		return true;
 	}
 

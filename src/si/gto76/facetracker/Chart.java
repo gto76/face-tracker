@@ -67,7 +67,7 @@ public class Chart extends ApplicationFrame  {
 	public void refresh(double value) {
 		this.lastValue = value;
 		final Millisecond now = new Millisecond();
-		System.out.println("Now = " + now.toString());
+		//System.out.println("Now = " + now.toString());
 		this.series.add(new Millisecond(), this.lastValue);
 	}
 

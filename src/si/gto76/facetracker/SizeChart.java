@@ -30,6 +30,7 @@ public class SizeChart extends ApplicationFrame  {
 		super(title);
 		seriesCollection = new TimeSeriesCollection();
 		chart = createChart(seriesCollection);
+		chart.removeLegend();
 
 		final ChartPanel chartPanel = new ChartPanel(chart);
 		final JPanel content = new JPanel(new BorderLayout());
