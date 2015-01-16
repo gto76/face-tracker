@@ -1,82 +1,83 @@
 package si.gto76.facetracker.charts;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.JPanel;
 
-import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.ValueAxis;
-import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.VectorRenderer;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.data.general.Series;
-import org.jfree.data.time.Millisecond;
-import org.jfree.data.time.TimeSeries;
-import org.jfree.data.xy.XYSeries;
-import org.jfree.data.xy.XYSeriesCollection;
+import org.jfree.data.xy.VectorSeries;
+import org.jfree.data.xy.VectorSeriesCollection;
+import org.jfree.data.xy.VectorXYDataset;
 import org.jfree.ui.ApplicationFrame;
+import org.jfree.ui.RectangleInsets;
 import org.opencv.core.Point;
 
 import si.gto76.facetracker.MyColor;
 
 public class MovementChart extends JPanel {
-
-	private static final int MAXIMUM_VALUES = 30;
+	private static final String TITLE = "Movements";
+	
+	private static final int RANGE = 60;
 	private static final long SERIES_AGE_TRESHOLD = 1000;
-	private final int width;
-	private final int height;
 
 	JFreeChart chart;
-	final XYSeriesCollection seriesCollection = new XYSeriesCollection();
+	final VectorSeriesCollection seriesCollection = new VectorSeriesCollection();
 
+	private Map<MyColor,Integer> collectionIndexes = new HashMap<MyColor, Integer>();
 	final Map<MyColor, Long> seriesStalenes = new HashMap<MyColor, Long>();
 
-	public MovementChart(final String title, int width, int height) {
+	public MovementChart(final String title) {
 		super();
-		this.width = width;
-		this.height = height;
 
-		createChart(seriesCollection, width, height);
+		createChart(seriesCollection);
 		chart.removeLegend();
 
 		final ChartPanel chartPanel = new ChartPanel(chart);
-//		final JPanel content = new JPanel(new BorderLayout());
-//		content.add(chartPanel);
-//		chartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
-//		setContentPane(content);
+		chartPanel.setMinimumDrawWidth(0);
+		chartPanel.setMinimumDrawHeight(0);
+		chartPanel.setMaximumDrawWidth(1200);
+		chartPanel.setMaximumDrawHeight(1200);
 		
 		this.add(chartPanel);
-		chartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
+		chartPanel.setPreferredSize(new java.awt.Dimension(270, 270));
 	}
 
-	private void createChart(final XYSeriesCollection dataset, int width, int height) {
-		chart = ChartFactory.createXYLineChart("test", // chart title
-				"X", // x axis label
-				"Y", // y axis label
-				dataset, // data
-				PlotOrientation.VERTICAL, true, // include legend
-				true, // tooltips
-				false // urls
-				);
-
-		final XYPlot plot = chart.getXYPlot();
-		ValueAxis axis = plot.getDomainAxis();
-		axis.setAutoRange(true);
-		axis.setRange(0.0, width);
-		axis = plot.getRangeAxis();
-		axis.setAutoRange(true);
-		axis.setRange(0.0, height);
+	private void createChart(VectorXYDataset dataset) { 
+		NumberAxis xAxis = new NumberAxis("X");
+		xAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+		xAxis.setRange(-RANGE, RANGE);
+		xAxis.setAutoRangeIncludesZero(false);
+		NumberAxis yAxis = new NumberAxis("Y");
+		yAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+		yAxis.setRange(-RANGE, RANGE);
+		yAxis.setAutoRangeIncludesZero(false);
+		//
+		VectorRenderer renderer = new VectorRenderer();
+		renderer.setSeriesPaint(0, Color.blue);
+		XYPlot plot = new XYPlot(dataset, xAxis, yAxis, renderer);
+		plot.setBackgroundPaint(Color.lightGray);
+		plot.setDomainGridlinePaint(Color.white);
+		plot.setRangeGridlinePaint(Color.white);
+		plot.setAxisOffset(new RectangleInsets(5D, 5D, 5D, 5D));
+		plot.setOutlinePaint(Color.black);
+		chart = new JFreeChart(TITLE, plot);
+		chart.setBackgroundPaint(Color.white);
 	}
 
 	public void refresh(Map<MyColor, Point> values) {
 		for (MyColor color : values.keySet()) {
-			XYSeries series = null;
+			VectorSeries series = null;
 			try {
-				series = seriesCollection.getSeries(color);
+				series = getSeries(color);
 			} catch (org.jfree.data.UnknownKeyException e) {
 
 			}
@@ -84,7 +85,7 @@ public class MovementChart extends JPanel {
 			if (series == null) {
 				addNewSeries(color, value);
 			} else {
-				series.add(value.x, height - value.y);
+				addToSeries(series, value);
 			}
 			Long now = System.currentTimeMillis();
 			seriesStalenes.put(color, now);
@@ -93,16 +94,28 @@ public class MovementChart extends JPanel {
 	}
 
 	private void addNewSeries(MyColor color, Point value) {
-		XYSeries series = new XYSeries("test", false);
-		series.setMaximumItemCount(MAXIMUM_VALUES);
+		VectorSeries series = new VectorSeries("test");
 		series.setKey(color);
-		series.add(value.x, height - value.y);
+		addToSeries(series, value);
 		seriesCollection.addSeries(series);
 		setColor(series, color);
 	}
 	
+	private static void addToSeries(VectorSeries series, Point point) {
+		series.clear();
+		series.add(0, 0, point.x, -point.y);
+	}
+	
+	private VectorSeries getSeries(MyColor color) {
+		int seriesIndex = seriesCollection.indexOf(color);
+		if (seriesIndex == -1) {
+			throw new org.jfree.data.UnknownKeyException("getSeries fail");
+		}
+		return seriesCollection.getSeries(seriesIndex);
+	}
+
 	private void setColor(Series series, MyColor color) {
-		int seriesIndex = seriesCollection.getSeriesIndex(color);
+		int seriesIndex = seriesCollection.indexOf(color);
 		XYPlot plot = chart.getXYPlot();
 		XYItemRenderer renderer = plot.getRenderer();
 		renderer.setSeriesPaint(seriesIndex, color.c);
@@ -115,7 +128,7 @@ public class MovementChart extends JPanel {
 			long age = now - lastSeen;
 			if (age > SERIES_AGE_TRESHOLD) {
 				try {
-					XYSeries series = seriesCollection.getSeries(color);
+					VectorSeries series = getSeries(color);
 					seriesCollection.removeSeries(series);
 				} catch (org.jfree.data.UnknownKeyException e) {
 

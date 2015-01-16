@@ -6,6 +6,7 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -19,15 +20,11 @@ import org.jfree.data.xy.XYDataset;
 import org.jfree.ui.ApplicationFrame;
 import org.jfree.ui.RefineryUtilities;
 
-/**
- * A demonstration application showing a time series chart where you can dynamically add (random) data by
- * clicking on a button.
- * 
- */
-public class NumberChart extends JPanel  {
+public class CounterChart extends JPanel  {
+	private static final String TITLE = "Counter";
 	
 	private static int RANGE_SECONDS = 60;
-	private static int RANGE_FACES = 4;
+	private static int RANGE_FACES = 2;
 
 	/** The time series data. */
 	private TimeSeries series;
@@ -37,26 +34,27 @@ public class NumberChart extends JPanel  {
 
 	JFreeChart chart;
 
-	public NumberChart(final String title) {
+	public CounterChart(final String title) {
 		super();
-		this.series = new TimeSeries("Random Data", Millisecond.class);
+		this.series = new TimeSeries(TITLE, Millisecond.class);
 		final TimeSeriesCollection dataset = new TimeSeriesCollection(this.series);
 		chart = createChart(dataset);
 		chart.removeLegend();
 
 		final ChartPanel chartPanel = new ChartPanel(chart);
-
-		//final JPanel content = new JPanel(new BorderLayout());
-		//content.add(chartPanel);
-		//chartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
-		//setContentPane(content);
+		chartPanel.setMinimumDrawWidth(0);
+		chartPanel.setMinimumDrawHeight(0);
+		chartPanel.setMaximumDrawWidth(1920);
+		chartPanel.setMaximumDrawHeight(1200);
 		
 		this.add(chartPanel);
-		chartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
+		// So that its aligned with sizes chart
+		this.setBorder(new EmptyBorder(0, 21, 0, 0));
+		chartPanel.setPreferredSize(new java.awt.Dimension(600, 185));
 	}
 
 	private JFreeChart createChart(final XYDataset dataset) {
-		final JFreeChart result = ChartFactory.createTimeSeriesChart("Dynamic Data Demo", "Time", "Value",
+		final JFreeChart result = ChartFactory.createTimeSeriesChart(TITLE, "Time", "Value",
 				dataset, true, true, false);
 		final XYPlot plot = result.getXYPlot();
 		ValueAxis axis = plot.getDomainAxis();
@@ -64,7 +62,7 @@ public class NumberChart extends JPanel  {
 		axis.setFixedAutoRange(RANGE_SECONDS * 1000);
 		axis = plot.getRangeAxis();
 		axis.setRange(0.0, RANGE_FACES);
-		axis.setAutoRange(true);
+		axis.setAutoRangeMinimumSize(RANGE_FACES);
 		return result;
 	}
 

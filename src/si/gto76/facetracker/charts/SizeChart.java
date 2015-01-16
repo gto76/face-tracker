@@ -24,6 +24,7 @@ import org.jfree.ui.ApplicationFrame;
 import si.gto76.facetracker.MyColor;
 
 public class SizeChart extends JPanel  {
+	private static final String TITLE = "Sizes";
 	
 	private static int RANGE_SECONDS = 60;
 	private static int RANGE_SIZE = 4;
@@ -37,17 +38,17 @@ public class SizeChart extends JPanel  {
 		chart.removeLegend();
 
 		final ChartPanel chartPanel = new ChartPanel(chart);
-//		final JPanel content = new JPanel(new BorderLayout());
-//		content.add(chartPanel);
-//		chartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
-//		setContentPane(content);
+		chartPanel.setMinimumDrawWidth(0);
+		chartPanel.setMinimumDrawHeight(0);
+		chartPanel.setMaximumDrawWidth(1920);
+		chartPanel.setMaximumDrawHeight(1200);
 		
 		this.add(chartPanel);
-		chartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
+		chartPanel.setPreferredSize(new java.awt.Dimension(620, 270));
 	}
 
 	private void createChart(final XYDataset dataset) {
-		chart = ChartFactory.createTimeSeriesChart("Dynamic Data Demo", "Time", "Value",
+		chart = ChartFactory.createTimeSeriesChart(TITLE, "Time", "Value",
 				dataset, true, true, false);
 		final XYPlot plot = chart.getXYPlot();
 		ValueAxis axis = plot.getDomainAxis();

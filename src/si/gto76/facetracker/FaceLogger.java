@@ -16,7 +16,7 @@ import org.opencv.core.Point;
 import org.opencv.core.Rect;
 
 public class FaceLogger {
-	public static long AGE_LIMIT_MILLIS = 1000;
+	public static long AGE_LIMIT_MILLIS = 2000;
 	private static final double TIME_WEIGHT = 0.1;
 	private static final double AREA_WEIGHT = 0.002;
 
