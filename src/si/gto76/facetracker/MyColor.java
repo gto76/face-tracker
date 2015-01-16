@@ -11,10 +11,9 @@ public class MyColor implements Comparable<MyColor> {
 
 	@Override
 	public int compareTo(MyColor other) {
-		if (c.getRGB() == other.c.getRGB()) {
-			return 0;
-		}
-		return 1;
+		Integer thisRGB = c.getRGB();
+		Integer otherRGB = other.c.getRGB();
+		return thisRGB.compareTo(otherRGB);
 	}
 
 }
