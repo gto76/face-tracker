@@ -12,6 +12,7 @@ import java.util.Random;
 import java.util.Set;
 
 import org.opencv.core.MatOfRect;
+import org.opencv.core.Point;
 import org.opencv.core.Rect;
 
 public class FaceLogger {
@@ -48,8 +49,8 @@ public class FaceLogger {
 	private void printFace(Face face) {
 		System.out.println("#### face "+face.color.c.getBlue());
 		System.out.println("t "+face.lastSeen);
-		System.out.println("x "+face.area.x);
-		System.out.println("y "+face.area.y);
+		System.out.println("x "+face.getCentroid().x);
+		System.out.println("y "+face.getCentroid().y);
 		System.out.println("z "+face.area.area());
 		System.out.println();
 	}
@@ -89,9 +90,11 @@ public class FaceLogger {
 	}
 
 	private Double getDistance(Rect area, Face face) {
-		double dx = area.x - face.area.x;
-		double dy = area.y - face.area.y;
-		double dz = (area.area() - face.area.area())/100;
+		Point areaCent = Util.getCentroide(area);
+		Point faceCent = face.getCentroid();
+		double dx = areaCent.x - faceCent.x;
+		double dy = areaCent.y - faceCent.y;
+		double dz = (area.area() - face.area.area())/500;
 		double dt = (lastCycleTime - face.lastSeen)/10;
 		return Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2) + Math.pow(dz, 2) + Math.pow(dt, 2));
 	}
@@ -201,6 +204,14 @@ public class FaceLogger {
 		return sizes;
 	}
 
+	public Map<MyColor, Point> getFacePositions() {
+		Map<MyColor,Point> positions = new HashMap<MyColor, Point>();
+		for (Face face: faces) {
+			positions.put(face.color, face.getCentroid());
+		}
+		return positions;
+	}
+
 }
 
 class Face {
@@ -212,6 +223,10 @@ class Face {
 		this.area = area;
 		this.lastSeen = lastSeen;
 		this.color = color;
+	}
+	
+	public Point getCentroid() {
+		return Util.getCentroide(area);
 	}
 
 	public long age() {

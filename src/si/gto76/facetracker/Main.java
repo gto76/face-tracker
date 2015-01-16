@@ -8,14 +8,20 @@ import javax.swing.JPanel;
 import org.jfree.ui.RefineryUtilities;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
+import org.opencv.core.Point;
 import org.opencv.videoio.VideoCapture;
+
+import si.gto76.facetracker.charts.MovementChart;
+import si.gto76.facetracker.charts.NumberChart;
+import si.gto76.facetracker.charts.SizeChart;
 
 public class Main extends JPanel {
 
 	public static final String LIB_OPENCV_JAVA = "D:\\DESKTOP-DATA\\home\\downloads\\opencv\\opencv\\build\\java\\x64\\opencv_java300.dll";
 
-	static Chart chartNoOfFaces;
+	static NumberChart chartNoOfFaces;
 	static SizeChart chartSizesOfFaces;
+	static MovementChart movementChart;
 
 	static FaceLogger faceLogger = new FaceLogger();
 
@@ -33,11 +39,13 @@ public class Main extends JPanel {
 		Display display = new Display();
 		frame.setContentPane(display);
 		frame.setVisible(true);
-		startChart();
 
 		// -- 2. Read the video stream
 		Mat webcam_image = new Mat();
 		VideoCapture capture = new VideoCapture(0);
+		
+		capture.read(webcam_image);
+		startChart(webcam_image.width(), webcam_image.height());
 
 		if (capture.isOpened()) {
 
@@ -65,12 +73,15 @@ public class Main extends JPanel {
 				
 				Map<MyColor, Double> faceSizes = faceLogger.getFaceSizes();
 				chartSizesOfFaces.refresh(faceSizes);
+				
+				Map<MyColor, Point> facePositions = faceLogger.getFacePositions();
+				movementChart.refresh(facePositions);
 			}
 		}
 	}
 
-	public static void startChart() {
-		chartNoOfFaces = new Chart("Number of faces");
+	public static void startChart(int width, int height) {
+		chartNoOfFaces = new NumberChart("Number of faces");
 		chartNoOfFaces.pack();
 		RefineryUtilities.centerFrameOnScreen(chartNoOfFaces);
 		chartNoOfFaces.setVisible(true);
@@ -79,6 +90,11 @@ public class Main extends JPanel {
 		chartSizesOfFaces.pack();
 		RefineryUtilities.centerFrameOnScreen(chartSizesOfFaces);
 		chartSizesOfFaces.setVisible(true);
+
+		movementChart = new MovementChart("Movement of faces", width, height);
+		movementChart.pack();
+		RefineryUtilities.centerFrameOnScreen(movementChart);
+		movementChart.setVisible(true);
 	}
 
 	public static void processImage() {

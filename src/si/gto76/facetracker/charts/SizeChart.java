@@ -1,10 +1,10 @@
-package si.gto76.facetracker;
+package si.gto76.facetracker.charts;
 
 import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.Color;
+import java.util.HashMap;
+import java.util.Map;
 
-import javax.swing.JButton;
 import javax.swing.JPanel;
 
 import org.jfree.chart.ChartFactory;
@@ -17,34 +17,23 @@ import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.ui.ApplicationFrame;
-import org.jfree.ui.RefineryUtilities;
 
-/**
- * A demonstration application showing a time series chart where you can dynamically add (random) data by
- * clicking on a button.
- * 
- */
-public class Chart extends ApplicationFrame  {
+import si.gto76.facetracker.MyColor;
+
+public class SizeChart extends ApplicationFrame  {
 	
 	private static int RANGE_SECONDS = 60;
-	private static int RANGE_FACES = 4;
+	private static int RANGE_SIZE = 4;
 
-	/** The time series data. */
-	private TimeSeries series;
-
-	/** The most recent value added. */
-	private double lastValue = 100.0;
-
+	final TimeSeriesCollection seriesCollection = new TimeSeriesCollection();
 	JFreeChart chart;
 
-	public Chart(final String title) {
+	public SizeChart(final String title) {
 		super(title);
-		this.series = new TimeSeries("Random Data", Millisecond.class);
-		final TimeSeriesCollection dataset = new TimeSeriesCollection(this.series);
-		chart = createChart(dataset);
+		chart = createChart(seriesCollection);
+		chart.removeLegend();
 
 		final ChartPanel chartPanel = new ChartPanel(chart);
-
 		final JPanel content = new JPanel(new BorderLayout());
 		content.add(chartPanel);
 		chartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
@@ -59,16 +48,29 @@ public class Chart extends ApplicationFrame  {
 		axis.setAutoRange(true);
 		axis.setFixedAutoRange(RANGE_SECONDS * 1000);
 		axis = plot.getRangeAxis();
-		axis.setRange(0.0, RANGE_FACES);
+		axis.setRange(0.0, RANGE_SIZE);
 		axis.setAutoRange(true);
 		return result;
 	}
 
-	public void refresh(double value) {
-		this.lastValue = value;
+	public void refresh(Map<MyColor,Double> values) {
 		final Millisecond now = new Millisecond();
-		//System.out.println("Now = " + now.toString());
-		this.series.add(new Millisecond(), this.lastValue);
+		
+		for (MyColor color: values.keySet()) {
+			TimeSeries series = seriesCollection.getSeries(color);
+			Double value = values.get(color);
+			if (series == null) {
+				addNewSeries(color, now, value);
+			} else {
+				series.add(now, value);
+			}
+		}
 	}
-
+	
+	private void addNewSeries(MyColor color, Millisecond now, Double value) {
+		TimeSeries series = new TimeSeries("Random Data", Millisecond.class);
+		series.setKey(color);
+		series.add(now, value);
+		seriesCollection.addSeries(series);
+	}
 }
