@@ -23,7 +23,7 @@ import org.jfree.ui.ApplicationFrame;
 
 import si.gto76.facetracker.MyColor;
 
-public class SizeChart extends ApplicationFrame  {
+public class SizeChart extends JPanel  {
 	
 	private static int RANGE_SECONDS = 60;
 	private static int RANGE_SIZE = 4;
@@ -32,15 +32,18 @@ public class SizeChart extends ApplicationFrame  {
 	final TimeSeriesCollection seriesCollection = new TimeSeriesCollection();
 
 	public SizeChart(final String title) {
-		super(title);
+		super();
 		createChart(seriesCollection);
 		chart.removeLegend();
 
 		final ChartPanel chartPanel = new ChartPanel(chart);
-		final JPanel content = new JPanel(new BorderLayout());
-		content.add(chartPanel);
+//		final JPanel content = new JPanel(new BorderLayout());
+//		content.add(chartPanel);
+//		chartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
+//		setContentPane(content);
+		
+		this.add(chartPanel);
 		chartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
-		setContentPane(content);
 	}
 
 	private void createChart(final XYDataset dataset) {

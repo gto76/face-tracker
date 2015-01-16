@@ -23,7 +23,7 @@ import org.opencv.core.Point;
 
 import si.gto76.facetracker.MyColor;
 
-public class MovementChart extends ApplicationFrame {
+public class MovementChart extends JPanel {
 
 	private static final int MAXIMUM_VALUES = 30;
 	private static final long SERIES_AGE_TRESHOLD = 1000;
@@ -36,7 +36,7 @@ public class MovementChart extends ApplicationFrame {
 	final Map<MyColor, Long> seriesStalenes = new HashMap<MyColor, Long>();
 
 	public MovementChart(final String title, int width, int height) {
-		super(title);
+		super();
 		this.width = width;
 		this.height = height;
 
@@ -44,10 +44,13 @@ public class MovementChart extends ApplicationFrame {
 		chart.removeLegend();
 
 		final ChartPanel chartPanel = new ChartPanel(chart);
-		final JPanel content = new JPanel(new BorderLayout());
-		content.add(chartPanel);
+//		final JPanel content = new JPanel(new BorderLayout());
+//		content.add(chartPanel);
+//		chartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
+//		setContentPane(content);
+		
+		this.add(chartPanel);
 		chartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
-		setContentPane(content);
 	}
 
 	private void createChart(final XYSeriesCollection dataset, int width, int height) {

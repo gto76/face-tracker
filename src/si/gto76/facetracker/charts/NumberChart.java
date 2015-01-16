@@ -24,7 +24,7 @@ import org.jfree.ui.RefineryUtilities;
  * clicking on a button.
  * 
  */
-public class NumberChart extends ApplicationFrame  {
+public class NumberChart extends JPanel  {
 	
 	private static int RANGE_SECONDS = 60;
 	private static int RANGE_FACES = 4;
@@ -38,17 +38,21 @@ public class NumberChart extends ApplicationFrame  {
 	JFreeChart chart;
 
 	public NumberChart(final String title) {
-		super(title);
+		super();
 		this.series = new TimeSeries("Random Data", Millisecond.class);
 		final TimeSeriesCollection dataset = new TimeSeriesCollection(this.series);
 		chart = createChart(dataset);
+		chart.removeLegend();
 
 		final ChartPanel chartPanel = new ChartPanel(chart);
 
-		final JPanel content = new JPanel(new BorderLayout());
-		content.add(chartPanel);
+		//final JPanel content = new JPanel(new BorderLayout());
+		//content.add(chartPanel);
+		//chartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
+		//setContentPane(content);
+		
+		this.add(chartPanel);
 		chartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
-		setContentPane(content);
 	}
 
 	private JFreeChart createChart(final XYDataset dataset) {

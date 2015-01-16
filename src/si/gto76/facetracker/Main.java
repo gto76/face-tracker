@@ -1,10 +1,14 @@
 package si.gto76.facetracker;
 
+import java.awt.Dimension;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import org.jfree.chart.ChartPanel;
 import org.jfree.ui.RefineryUtilities;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
@@ -14,14 +18,17 @@ import org.opencv.videoio.VideoCapture;
 import si.gto76.facetracker.charts.MovementChart;
 import si.gto76.facetracker.charts.NumberChart;
 import si.gto76.facetracker.charts.SizeChart;
+import si.gto76.facetracker.charts.VectorChart;
 
 public class Main extends JPanel {
 
 	public static final String LIB_OPENCV_JAVA = "D:\\DESKTOP-DATA\\home\\downloads\\opencv\\opencv\\build\\java\\x64\\opencv_java300.dll";
 
-	static NumberChart chartNoOfFaces;
-	static SizeChart chartSizesOfFaces;
-	static MovementChart movementChart;
+	ChartsWindow chartsWindow;
+	static NumberChart noOfFacesChart;
+	static SizeChart sizeChart;
+	static MovementChart positionChart;
+	static VectorChart vectorChart;
 
 	static FaceLogger faceLogger = new FaceLogger();
 
@@ -45,7 +52,7 @@ public class Main extends JPanel {
 		VideoCapture capture = new VideoCapture(0);
 		
 		capture.read(webcam_image);
-		startChart(webcam_image.width(), webcam_image.height());
+		startCharts(webcam_image.width(), webcam_image.height());
 
 		if (capture.isOpened()) {
 
@@ -69,32 +76,59 @@ public class Main extends JPanel {
 				faceLogger.tick(data);
 
 				int noOfFaces = faceLogger.getNoOfFaces();
-				chartNoOfFaces.refresh(noOfFaces);
+				noOfFacesChart.refresh(noOfFaces);
 				
 				Map<MyColor, Double> faceSizes = faceLogger.getFaceSizes();
-				chartSizesOfFaces.refresh(faceSizes);
+				sizeChart.refresh(faceSizes);
 				
 				Map<MyColor, Point> facePositions = faceLogger.getFacePositions();
-				movementChart.refresh(facePositions);
+				positionChart.refresh(facePositions);
+
+				Map<MyColor, Point> faceMovements = faceLogger.getFaceMovements();
+				vectorChart.refresh(faceMovements);
 			}
 		}
 	}
 
-	public static void startChart(int width, int height) {
-		chartNoOfFaces = new NumberChart("Number of faces");
-		chartNoOfFaces.pack();
-		RefineryUtilities.centerFrameOnScreen(chartNoOfFaces);
-		chartNoOfFaces.setVisible(true);
+	public static void startCharts(int width, int height) {
+		
+//		noOfFacesChart = new NumberChart("Number of faces");
+//		noOfFacesChart.pack();
+//		RefineryUtilities.centerFrameOnScreen(noOfFacesChart);
+//		noOfFacesChart.setVisible(true);
+//
+//		sizeChart = new SizeChart("Sizes of faces");
+//		sizeChart.pack();
+//		RefineryUtilities.centerFrameOnScreen(sizeChart);
+//		sizeChart.setVisible(true);
+//
+//		positionChart = new MovementChart("Movement of faces", width, height);
+//		positionChart.pack();
+//		RefineryUtilities.centerFrameOnScreen(positionChart);
+//		positionChart.setVisible(true);
+//		
+//		vectorChart = new VectorChart("Vectors of movement");
+//		vectorChart.pack();
+//        RefineryUtilities.centerFrameOnScreen(vectorChart);
+//        vectorChart.setVisible(true);
+		
 
-		chartSizesOfFaces = new SizeChart("Sizes of faces");
-		chartSizesOfFaces.pack();
-		RefineryUtilities.centerFrameOnScreen(chartSizesOfFaces);
-		chartSizesOfFaces.setVisible(true);
+		List<Pair<JPanel, Dimension>> chartPanelsWithSizes = new ArrayList<Pair<JPanel,Dimension>>();
+        
+		noOfFacesChart = new NumberChart("Number of faces");
+		sizeChart = new SizeChart("Sizes of faces");
+		positionChart = new MovementChart("Movement of faces", width, height);
+		vectorChart = new VectorChart("Vectors of movement");
 
-		movementChart = new MovementChart("Movement of faces", width, height);
-		movementChart.pack();
-		RefineryUtilities.centerFrameOnScreen(movementChart);
-		movementChart.setVisible(true);
+		chartPanelsWithSizes.add(Pair.of((JPanel) noOfFacesChart, (Dimension) null));
+		chartPanelsWithSizes.add(Pair.of((JPanel) sizeChart, (Dimension) null));
+		chartPanelsWithSizes.add(Pair.of((JPanel) positionChart, (Dimension) null));
+		chartPanelsWithSizes.add(Pair.of((JPanel) vectorChart, (Dimension) null));
+
+		ChartsWindow chartsWindow = new ChartsWindow("Stats", chartPanelsWithSizes);
+		chartsWindow.pack();
+        RefineryUtilities.centerFrameOnScreen(chartsWindow);
+        chartsWindow.setVisible(true);
 	}
 
 	public static void processImage() {

@@ -17,29 +17,51 @@ import org.opencv.core.Rect;
 
 public class FaceLogger {
 	public static long AGE_LIMIT_MILLIS = 1000;
+	private static final double TIME_WEIGHT = 0.1;
+	private static final double AREA_WEIGHT = 0.002;
 
 	List<Face> faces = new ArrayList<Face>();
 	private long lastCycleTime = 0;
 
 	static final Random RAND = new Random();
 
-	public void tick(MatOfRect areas) {
+	// /////////////////////////
+	// /// THE TICK METHOD /////
+	// /////////////////////////
+
+	public void tick(MatOfRect rects) {
 		lastCycleTime = System.currentTimeMillis();
-
 		removeOldFaces();
-
-		// find nearest face of all the areas
-		Map<Rect, Face> nearestFaces = findNearestFaces(areas);
-
-		// check where face occurs more than one and add face to closer area
-		enforceSingleFacePerArea(nearestFaces);
-
-		// for areas without the face create new face
-		createNewFacesForAreasWithoutAndUpdateOldOnes(nearestFaces);
-
+		// find nearest face for all the rectangles
+		Map<Rect, Face> nearestFaces = findNearestFaces(rects);
+		// check where face occurs more than one and add face to closer rectangle
+		enforceSingleFacePerRect(nearestFaces);
+		createNewFacesForRectsWithoutAndUpdateOldOnes(nearestFaces);
 		removeGlitchFaces();
-
 		printAllFaces();
+	}
+
+	private void removeOldFaces() {
+		Iterator<Face> i = faces.iterator();
+		while (i.hasNext()) {
+			Face face = i.next();
+			if (face.getMillisSinceLost() > AGE_LIMIT_MILLIS) {
+				i.remove();
+			}
+		}
+	}
+
+	/**
+	 * Removes faces that were created last cycle and have no Rect already in this one.
+	 */
+	private void removeGlitchFaces() {
+		Iterator<Face> i = faces.iterator();
+		while (i.hasNext()) {
+			Face face = i.next();
+			if (face.iterations == 0 && face.lastSeen != lastCycleTime) {
+				i.remove();
+			}
+		}
 	}
 
 	private void printAllFaces() {
@@ -50,62 +72,54 @@ public class FaceLogger {
 
 	private void printFace(Face face) {
 		System.out.println("#### face " + face.color.c.getBlue());
-		System.out.println("t " + face.millisSinceLost());
+		System.out.println("t " + face.getAdjustedTimeSinceLost());
 		System.out.println("x " + face.getCentroid().x);
 		System.out.println("y " + face.getCentroid().y);
-		System.out.println("z " + face.area.area());
+		System.out.println("z " + face.getAdjustedSize());
+		System.out.println("dx " + face.getDirection().x);
+		System.out.println("dy " + face.getDirection().y);
 		System.out.println();
 	}
 
-	private void removeOldFaces() {
-		Iterator<Face> i = faces.iterator();
-		while (i.hasNext()) {
-			Face face = i.next();
-			if (face.millisSinceLost() > AGE_LIMIT_MILLIS) {
-				i.remove();
-			}
-		}
-	}
+	// //////////////////////////////////////////////////
+	// /// FIND NEAREST FACE OF ALL THE RECTANGLES //////
+	// //////////////////////////////////////////////////
 
-	// /////////////////////////////////////////////
-	// /// FIND NEAREST FACE OF ALL THE AREAS //////
-	// /////////////////////////////////////////////
-
-	private Map<Rect, Face> findNearestFaces(MatOfRect areas) {
+	private Map<Rect, Face> findNearestFaces(MatOfRect rects) {
 		Map<Rect, Face> nearestFaces = new HashMap<Rect, Face>();
-		for (Rect area : areas.toArray()) {
+		for (Rect rect : rects.toArray()) {
 			Map<Double, Face> distanceMap = new HashMap<Double, Face>();
 			for (Face face : faces) {
-				Double distance = getDistance(area, face);
+				Double distance = getDistance(rect, face);
 				distanceMap.put(distance, face);
 			}
 			List<Double> distances = new ArrayList<>(distanceMap.keySet());
 			if (distances.size() == 0) {
-				nearestFaces.put(area, null);
+				nearestFaces.put(rect, null);
 			} else {
 				Collections.sort(distances);
 				Face nearestFace = distanceMap.get(distances.get(0));
-				nearestFaces.put(area, nearestFace);
+				nearestFaces.put(rect, nearestFace);
 			}
 		}
 		return nearestFaces;
 	}
 
-	private Double getDistance(Rect area, Face face) {
-		Point areaCent = Util.getCentroide(area);
+	private Double getDistance(Rect rect, Face face) {
+		Point rectCent = Util.getCentroide(rect);
 		Point faceCent = face.getCentroid();
-		double dx = areaCent.x - faceCent.x;
-		double dy = areaCent.y - faceCent.y;
-		double dz = (area.area() - face.area.area()) / 500;
-		double dt = (lastCycleTime - face.lastSeen) / 10;
+		double dx = rectCent.x - faceCent.x;
+		double dy = rectCent.y - faceCent.y;
+		double dz = (rect.area() - face.getRect().area()) * AREA_WEIGHT;
+		double dt = face.getAdjustedTimeSinceLost();
 		return Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2) + Math.pow(dz, 2) + Math.pow(dt, 2));
 	}
 
-	// ///////////////////////////////////////
-	// /// ENFORCE SINGLE FACE PER AREA //////
-	// ///////////////////////////////////////
+	// ////////////////////////////////////////////
+	// /// ENFORCE SINGLE FACE PER RECTANGLE //////
+	// ////////////////////////////////////////////
 
-	private void enforceSingleFacePerArea(Map<Rect, Face> nearestFaces) {
+	private void enforceSingleFacePerRect(Map<Rect, Face> nearestFaces) {
 		Map<Face, Integer> occurances = countOccurances(nearestFaces);
 		for (Entry<Face, Integer> faceWithCount : occurances.entrySet()) {
 			if (faceWithCount.getValue() > 1) {
@@ -162,18 +176,18 @@ public class FaceLogger {
 		}
 	}
 
-	// ////////////////////////////////////////////////////
-	// /// CREATE NEW FACES FOR AREAS WITHOUT A FACE //////
-	// ////////////////////////////////////////////////////
+	// /////////////////////////////////////////////////////////
+	// /// CREATE NEW FACES FOR RECTANGLES WITHOUT A FACE //////
+	// /////////////////////////////////////////////////////////
 
-	private void createNewFacesForAreasWithoutAndUpdateOldOnes(Map<Rect, Face> nearestFaces) {
+	private void createNewFacesForRectsWithoutAndUpdateOldOnes(Map<Rect, Face> nearestFaces) {
 		for (Rect rect : nearestFaces.keySet()) {
 			Face nearestFace = nearestFaces.get(rect);
 			if (nearestFace == null) {
 				Face face = new Face(rect, lastCycleTime, getRandomColor());
 				faces.add(face);
 			} else {
-				nearestFace.area = rect;
+				nearestFace.setRect(rect);
 				nearestFace.lastSeen = lastCycleTime;
 				nearestFace.iterations++;
 			}
@@ -188,19 +202,6 @@ public class FaceLogger {
 		return new MyColor(randomColor);
 	}
 
-	/**
-	 * Removes faces that were created last cycle and have no Rect already in this one.
-	 */
-	private void removeGlitchFaces() {
-		Iterator<Face> i = faces.iterator();
-		while (i.hasNext()) {
-			Face face = i.next();
-			if (face.iterations == 0 && face.lastSeen != lastCycleTime) {
-				i.remove();
-			}
-		}
-	}
-
 	// ////////////////////////////
 	// ///// PUBLIC GETTERS ///////
 	// ////////////////////////////
@@ -210,8 +211,8 @@ public class FaceLogger {
 		for (Face face : faces) {
 			// do not include the newbies, and include the oldies that just got droped
 			boolean activeNotNoob = face.lastSeen == lastCycleTime && face.iterations != 0;
-			boolean nonactiveFreshman = face.millisSinceLost() < 10 && face.iterations > 10; 
-			boolean nonactiveVeteran = face.millisSinceLost() < 500 && face.getAge() > 4000; 
+			boolean nonactiveFreshman = face.getMillisSinceLost() < 10 && face.iterations > 10;
+			boolean nonactiveVeteran = face.getMillisSinceLost() < 500 && face.getAge() > 4000;
 			if (activeNotNoob || nonactiveFreshman || nonactiveVeteran) {
 				noOfFaces++;
 			}
@@ -223,7 +224,7 @@ public class FaceLogger {
 		Map<MyColor, Double> sizes = new HashMap<MyColor, Double>();
 		for (Face face : faces) {
 			if (face.iterations > 0) {
-				sizes.put(face.color, face.area.area());
+				sizes.put(face.color, face.getRect().area());
 			}
 		}
 		return sizes;
@@ -239,33 +240,77 @@ public class FaceLogger {
 		return positions;
 	}
 
-}
-
-class Face {
-	Rect area;
-	final long created;
-	long lastSeen;
-	final MyColor color;
-	int iterations = 0;
-
-	public Face(Rect area, long lastSeen, MyColor color) {
-		this.area = area;
-		this.created = lastSeen;
-		this.lastSeen = lastSeen;
-		this.color = color;
+	public Map<MyColor, Point> getFaceMovements() {
+		Map<MyColor, Point> movements = new HashMap<MyColor, Point>();
+		for (Face face : faces) {
+			if (face.iterations > 0) {
+				movements.put(face.color, face.getDirection());
+			}
+		}
+		return movements;
 	}
 
-	public Point getCentroid() {
-		return Util.getCentroide(area);
-	}
+	// ////////////////////////
+	// ///// FACE CLASS ///////
+	// ////////////////////////
 
-	public long millisSinceLost() {
-		long currentTimeMillis = System.currentTimeMillis();
-		return currentTimeMillis - lastSeen;
-	}
-	
-	public long getAge() {
-		long currentTimeMillis = System.currentTimeMillis();
-		return currentTimeMillis - created;
+	private class Face {
+		private Rect rect;
+		private Rect lastRect;
+		final long created;
+		long lastSeen;
+		final MyColor color;
+		int iterations = 0;
+
+		public Face(Rect rect, long lastSeen, MyColor color) {
+			this.rect = rect;
+			this.lastRect = rect;
+			this.created = lastSeen;
+			this.lastSeen = lastSeen;
+			this.color = color;
+		}
+
+		public Point getDirection() {
+			Point newCentr = Util.getCentroide(rect);
+			Point oldCentr = Util.getCentroide(lastRect);
+			return new Point(newCentr.x - oldCentr.x, newCentr.y - oldCentr.y);
+		}
+
+		public void setRect(Rect rect) {
+			lastRect = this.rect;
+			this.rect = rect;
+		}
+
+		public Rect getRect() {
+			return rect;
+		}
+
+		public Point getCentroid() {
+			return Util.getCentroide(rect);
+		}
+
+		public long getMillisSinceLost() {
+			long currentTimeMillis = System.currentTimeMillis();
+			return currentTimeMillis - lastSeen;
+		}
+
+		public long getAge() {
+			long currentTimeMillis = System.currentTimeMillis();
+			return currentTimeMillis - created;
+		}
+		
+		/**
+		 *  Milliseconds since lost adjusted
+		 */
+		public double getAdjustedTimeSinceLost() {
+			return (lastCycleTime - lastSeen) * TIME_WEIGHT;
+		}
+		
+		/**
+		 *  Rectangle area size adjusted
+		 */
+		public double getAdjustedSize() {
+			return rect.area() * AREA_WEIGHT;
+		}
 	}
 }
