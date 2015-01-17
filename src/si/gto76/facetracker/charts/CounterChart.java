@@ -11,6 +11,7 @@ import javax.swing.border.EmptyBorder;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.time.Millisecond;
@@ -24,7 +25,7 @@ public class CounterChart extends JPanel  {
 	private static final String TITLE = "Counter";
 	
 	private static int RANGE_SECONDS = 60;
-	private static int RANGE_FACES = 2;
+	private static int RANGE_FACES = 3;
 
 	/** The time series data. */
 	private TimeSeries series;
@@ -60,9 +61,16 @@ public class CounterChart extends JPanel  {
 		ValueAxis axis = plot.getDomainAxis();
 		axis.setAutoRange(true);
 		axis.setFixedAutoRange(RANGE_SECONDS * 1000);
-		axis = plot.getRangeAxis();
-		axis.setRange(0.0, RANGE_FACES);
-		axis.setAutoRangeMinimumSize(RANGE_FACES);
+//		axis = plot.getRangeAxis();
+//		axis.setRange(0.0, RANGE_FACES);
+//		axis.setAutoRangeMinimumSize(RANGE_FACES);
+		
+		
+		NumberAxis axisX = (NumberAxis) plot.getRangeAxis();
+		axisX.setRange(0.0, RANGE_FACES);
+		axisX.setAutoRangeIncludesZero(true);
+		
+		
 		return result;
 	}
 

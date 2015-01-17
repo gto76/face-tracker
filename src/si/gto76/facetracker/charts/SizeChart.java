@@ -10,6 +10,7 @@ import javax.swing.JPanel;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
@@ -27,7 +28,7 @@ public class SizeChart extends JPanel  {
 	private static final String TITLE = "Sizes";
 	
 	private static int RANGE_SECONDS = 60;
-	private static int RANGE_SIZE = 4;
+	private static double RANGE_SIZE = 60000.0;
 
 	JFreeChart chart;
 	final TimeSeriesCollection seriesCollection = new TimeSeriesCollection();
@@ -54,9 +55,10 @@ public class SizeChart extends JPanel  {
 		ValueAxis axis = plot.getDomainAxis();
 		axis.setAutoRange(true);
 		axis.setFixedAutoRange(RANGE_SECONDS * 1000);
-		axis = plot.getRangeAxis();
-		axis.setRange(0.0, RANGE_SIZE);
-		axis.setAutoRange(true);
+		
+		NumberAxis axisX = (NumberAxis) plot.getRangeAxis();
+		axisX.setRange(0.0, RANGE_SIZE);
+		axisX.setAutoRangeIncludesZero(true);
 	}
 
 	public void refresh(Map<MyColor,Double> values) {

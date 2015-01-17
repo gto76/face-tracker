@@ -1,7 +1,5 @@
 package si.gto76.facetracker;
 
-import java.awt.Component;
-import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -9,13 +7,15 @@ import java.util.Map;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import org.jfree.chart.ChartPanel;
 import org.jfree.ui.RefineryUtilities;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
 import org.opencv.core.Point;
 import org.opencv.videoio.VideoCapture;
 
+import si.gto76.facetracker.averagers.CountAverager;
+import si.gto76.facetracker.averagers.MovementAverager;
+import si.gto76.facetracker.averagers.SizeAverager;
 import si.gto76.facetracker.charts.PositionChart;
 import si.gto76.facetracker.charts.CounterChart;
 import si.gto76.facetracker.charts.SizeChart;
@@ -24,6 +24,10 @@ import si.gto76.facetracker.charts.MovementChart;
 public class Main extends JPanel {
 
 	public static final String LIB_OPENCV_JAVA = "D:\\DESKTOP-DATA\\home\\downloads\\opencv\\opencv\\build\\java\\x64\\opencv_java300.dll";
+
+	private static final int SIZE_WINDOW = 10;
+	private static final int MOVEMENT_WINDOW = 3;
+	private static final int NUMBER_WINDOW = 7;
 
 	ChartsWindow chartsWindow;
 	static CounterChart noOfFacesChart;
@@ -39,14 +43,14 @@ public class Main extends JPanel {
 
 	public static void processVideo() {
 		System.load(LIB_OPENCV_JAVA);
-		String window_name = "Capture - Face detection";
-		JFrame frame = new JFrame(window_name);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setSize(640, 480);
-		DemoFace my_processor = new DemoFace();
 		Display display = new Display();
-		frame.setContentPane(display);
-		frame.setVisible(true);
+		JFrame frame = getVideoFrame(display);
+		DemoFace my_processor = new DemoFace();
+		
+		// SET AVERAGERS
+		SizeAverager faceSizesAverager = new SizeAverager(SIZE_WINDOW);
+		MovementAverager faceMovementAverager = new MovementAverager(MOVEMENT_WINDOW);
+		CountAverager faceNumberAverager = new CountAverager(NUMBER_WINDOW);
 
 		// -- 2. Read the video stream
 		Mat webcam_image = new Mat();
@@ -80,15 +84,27 @@ public class Main extends JPanel {
 				noOfFacesChart.refresh(noOfFaces);
 				
 				Map<MyColor, Double> faceSizes = faceLogger.getFaceSizes();
+				faceSizes = faceSizesAverager.tick(faceSizes);
 				sizeChart.refresh(faceSizes);
 				
 				Map<MyColor, Point> facePositions = faceLogger.getFacePositions();
 				positionChart.refresh(facePositions);
 
 				Map<MyColor, Point> faceMovements = faceLogger.getFaceMovements();
+				faceMovements = faceMovementAverager.tick(faceMovements);
 				movementChart.refresh(faceMovements);
 			}
 		}
+	}
+	
+	public static JFrame getVideoFrame(Display display) {
+		String window_name = "Capture - Face detection";
+		JFrame frame = new JFrame(window_name);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setSize(640, 480);
+		frame.setContentPane(display);
+		frame.setVisible(true);
+		return frame;
 	}
 
 	public static void startCharts(int width, int height) {

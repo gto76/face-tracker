@@ -38,7 +38,7 @@ public class FaceLogger {
 		enforceSingleFacePerRect(nearestFaces);
 		createNewFacesForRectsWithoutAndUpdateOldOnes(nearestFaces);
 		removeGlitchFaces();
-		printAllFaces();
+		//printAllFaces();
 	}
 
 	private void removeOldFaces() {
