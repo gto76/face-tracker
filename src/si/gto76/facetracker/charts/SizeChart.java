@@ -28,7 +28,7 @@ public class SizeChart extends JPanel  {
 	private static final String TITLE = "Sizes";
 	
 	private static int RANGE_SECONDS = 60;
-	private static double RANGE_SIZE = 60000.0;
+	private static double RANGE_SIZE = 40000.0;
 
 	JFreeChart chart;
 	final TimeSeriesCollection seriesCollection = new TimeSeriesCollection();
@@ -59,6 +59,7 @@ public class SizeChart extends JPanel  {
 		NumberAxis axisX = (NumberAxis) plot.getRangeAxis();
 		axisX.setRange(0.0, RANGE_SIZE);
 		axisX.setAutoRangeIncludesZero(true);
+		axisX.setAutoRange(true);
 	}
 
 	public void refresh(Map<MyColor,Double> values) {

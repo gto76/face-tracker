@@ -11,9 +11,12 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 
+import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
+import org.opencv.imgproc.Imgproc;
 
 public class FaceLogger {
 	public static long AGE_LIMIT_MILLIS = 2000;
@@ -249,7 +252,17 @@ public class FaceLogger {
 		}
 		return movements;
 	}
-
+	
+	public void markFaces(Mat image) {
+		for (Face face: faces) {
+			Rect rect = face.rect;
+			Color color = face.color.c;
+			Scalar colorScalar = new Scalar(color.getBlue(), color.getGreen(), color.getRed(), 255);
+			Imgproc.rectangle(image, new Point(rect.x, rect.y), new Point(rect.x + rect.width, rect.y
+					+ rect.height), colorScalar);
+		}
+	}
+	
 	// ////////////////////////
 	// ///// FACE CLASS ///////
 	// ////////////////////////

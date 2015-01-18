@@ -1,10 +1,5 @@
 package si.gto76.facetracker.charts;
 
-import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
-import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
@@ -18,14 +13,12 @@ import org.jfree.data.time.Millisecond;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.data.xy.XYDataset;
-import org.jfree.ui.ApplicationFrame;
-import org.jfree.ui.RefineryUtilities;
 
 public class CounterChart extends JPanel  {
 	private static final String TITLE = "Counter";
 	
 	private static int RANGE_SECONDS = 60;
-	private static int RANGE_FACES = 3;
+	private static double RANGE_FACES = 3.0;
 
 	/** The time series data. */
 	private TimeSeries series;
@@ -61,15 +54,11 @@ public class CounterChart extends JPanel  {
 		ValueAxis axis = plot.getDomainAxis();
 		axis.setAutoRange(true);
 		axis.setFixedAutoRange(RANGE_SECONDS * 1000);
-//		axis = plot.getRangeAxis();
-//		axis.setRange(0.0, RANGE_FACES);
-//		axis.setAutoRangeMinimumSize(RANGE_FACES);
-		
-		
+
 		NumberAxis axisX = (NumberAxis) plot.getRangeAxis();
 		axisX.setRange(0.0, RANGE_FACES);
 		axisX.setAutoRangeIncludesZero(true);
-		
+		axisX.setAutoRange(true);
 		
 		return result;
 	}
