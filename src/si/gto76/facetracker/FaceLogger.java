@@ -299,6 +299,9 @@ public class FaceLogger {
 
 	public void markFaces(Mat image) {
 		for (Face face : faces) {
+			if (face.iterations < 1) {
+				continue;
+			}
 			Rect rect = face.rect;
 			Color color = face.color.c;
 			Scalar colorScalar = new Scalar(color.getBlue(), color.getGreen(), color.getRed(), 255);

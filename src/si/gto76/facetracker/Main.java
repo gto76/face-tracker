@@ -39,7 +39,9 @@ public class Main extends JPanel {
 	private static final int NUMBER_WINDOW = 5;
 
 	private static final double FPS = 24;
+	double fps = 0.0;
 	private static final double MSPF = 1000/FPS;
+	double mspf = 0.0;
 	private static final boolean SKIP_FRAMES = true;
 
 	VideoCapture capture;
@@ -111,6 +113,15 @@ public class Main extends JPanel {
 		startCharts(lastFrame.width(), lastFrame.height());
 		frame.setSize(lastFrame.width() + 40, lastFrame.height() + 60);
 		
+		// get fps
+		fps = capture.get(5);
+		if (fps == 0.0) {
+			fps = FPS;
+			mspf = MSPF;
+		} else {
+			System.out.println("#### fps "+fps);
+			mspf = 1000/fps;
+		}
 
 		// Start main loop
 		long startTime = System.currentTimeMillis();
@@ -124,7 +135,7 @@ public class Main extends JPanel {
 						return;
 					}
 				}
-				frameNumber += skipNumber;
+				frameNumber += skipNumber + 1;
 			}
 		}
 	}
@@ -132,9 +143,9 @@ public class Main extends JPanel {
 	private int getSkipNumber(long startTime, long frameNumber) {
 		long now = System.currentTimeMillis();
 		long runningTime = now - startTime;
-		long videoTime = (long) (frameNumber*MSPF);
+		long videoTime = (long) (frameNumber*mspf);
 		long lag = runningTime - videoTime;
-		return (int) (lag / MSPF);
+		return (int) (lag / mspf);
 	}
 
 	private static JFrame getVideoFrame(Display display) {
