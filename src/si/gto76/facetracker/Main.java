@@ -29,6 +29,7 @@ import si.gto76.facetracker.charts.MovementChart;
 public class Main extends JPanel {
 
 	public static final String LIB_OPENCV_JAVA = "D:\\DESKTOP-DATA\\home\\downloads\\opencv\\opencv\\build\\java\\x64\\opencv_java300.dll";
+	public static final String FFMPEG = "D:\\DESKTOP-DATA\\home\\downloads\\opencv\\opencv\\build\\x64\\vc10\\bin\\opencv_ffmpeg300_64.dll";
 	private static final String CASCADE_PATH = "D:\\DESKTOP-DATA\\home\\downloads\\opencv\\opencv\\sources\\data\\lbpcascades\\lbpcascade_frontalface.xml";
 	private CascadeClassifier face_cascade;
 
@@ -39,7 +40,7 @@ public class Main extends JPanel {
 
 	private static final double FPS = 24;
 	private static final double MSPF = 1000/FPS;
-	private static final boolean SKIP_FRAMES = false;
+	private static final boolean SKIP_FRAMES = true;
 
 	VideoCapture capture;
 	
@@ -77,6 +78,7 @@ public class Main extends JPanel {
 	public void processVideo(String path) {
 		// Set library
 		System.load(LIB_OPENCV_JAVA);
+		System.load(FFMPEG);
 		face_cascade = new CascadeClassifier(CASCADE_PATH);
 
 		// Open empty main window
@@ -114,7 +116,7 @@ public class Main extends JPanel {
 		long startTime = System.currentTimeMillis();
 		long frameNumber = 0;
 		while (mainLoop(capture, display)) {
-			if (SKIP_FRAMES) {
+			if (fromFile && SKIP_FRAMES) {
 				int skipNumber = getSkipNumber(startTime, frameNumber);
 				for (int i = 0; i < skipNumber; i++) {
 					boolean stillRunning = capture.read(new Mat());

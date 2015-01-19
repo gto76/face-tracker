@@ -22,14 +22,22 @@ import org.opencv.imgproc.Imgproc;
 import com.orsoncharts.graphics3d.Point3D;
 
 public class FaceLogger {
+	// deletes faces older than limit
 	public static long AGE_LIMIT_MILLIS = 2000;
+	
+	// wheights for calculating distances
 	private static final double TIME_WEIGHT = 0.1;
 	private static final double AREA_WEIGHT = 0.002;
+
+	// sizefactor reduces distances between larger objects
+	private static final boolean USE_SIZE_FACTOR = true;
+	private static final double SIZE_FACTOR = 10000;
 	
 	// If set to false only rectangles with lower distance to the face then treshold
 	// will be concidered to belong to a face
 	private static final boolean ALLOW_ALL_DISTANCES = false;
 	private static final Double DISTANCE_TRESHOLD = 200.0;
+
 
 	private static final Color BACKGROUND_COLOR = new Color(190, 190, 190);
 	private static final int REQUIRED_COLOR_DISTANCE = 90;
@@ -124,11 +132,16 @@ public class FaceLogger {
 		return nearestFaces;
 	}
 
+	
 	private Double getDistance(Rect rect, Face face) {
 		Point rectCent = Util.getCentroide(rect);
 		Point faceCent = face.getCentroid();
-		double dx = rectCent.x - faceCent.x;
-		double dy = rectCent.y - faceCent.y;
+		double sizeFactor = 1;
+		if (USE_SIZE_FACTOR) {
+			sizeFactor = rect.area()/SIZE_FACTOR;
+		}
+		double dx = (rectCent.x - faceCent.x)/sizeFactor;
+		double dy = (rectCent.y - faceCent.y)/sizeFactor;
 		double dz = (rect.area() - face.getRect().area()) * AREA_WEIGHT;
 		double dt = face.getAdjustedTimeSinceLost();
 		return Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2) + Math.pow(dz, 2) + Math.pow(dt, 2));

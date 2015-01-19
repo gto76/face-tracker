@@ -28,7 +28,7 @@ import si.gto76.facetracker.MyColor;
 public class PositionChart extends JPanel {
 	private static final String TITLE = "Positions";
 
-	private static final int MAXIMUM_VALUES = 20;
+	private static final int MAXIMUM_VALUES = 30;
 	private static final long SERIES_AGE_TRESHOLD = 200;
 
 	private static final int DOT_SIZE = 5;
