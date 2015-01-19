@@ -27,7 +27,7 @@ public class MovementChart extends JPanel {
 	private static final String TITLE = "Movements";
 	
 	private static final int RANGE = 60;
-	private static final long SERIES_AGE_TRESHOLD = 1000;
+	private static final long SERIES_AGE_TRESHOLD = 200;
 
 	JFreeChart chart;
 	final VectorSeriesCollection seriesCollection = new VectorSeriesCollection();

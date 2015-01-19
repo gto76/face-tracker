@@ -29,9 +29,9 @@ public class PositionChart extends JPanel {
 	private static final String TITLE = "Positions";
 
 	private static final int MAXIMUM_VALUES = 20;
-	private static final long SERIES_AGE_TRESHOLD = 1000;
+	private static final long SERIES_AGE_TRESHOLD = 200;
 
-	private static final int DOT_SIZE = 4;
+	private static final int DOT_SIZE = 5;
 	private final int width;
 	private final int height;
 

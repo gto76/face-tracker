@@ -25,6 +25,11 @@ public class FaceLogger {
 	public static long AGE_LIMIT_MILLIS = 2000;
 	private static final double TIME_WEIGHT = 0.1;
 	private static final double AREA_WEIGHT = 0.002;
+	
+	// If set to false only rectangles with lower distance to the face then treshold
+	// will be concidered to belong to a face
+	private static final boolean ALLOW_ALL_DISTANCES = false;
+	private static final Double DISTANCE_TRESHOLD = 200.0;
 
 	private static final Color BACKGROUND_COLOR = new Color(190, 190, 190);
 	private static final int REQUIRED_COLOR_DISTANCE = 90;
@@ -107,8 +112,13 @@ public class FaceLogger {
 				nearestFaces.put(rect, null);
 			} else {
 				Collections.sort(distances);
-				Face nearestFace = distanceMap.get(distances.get(0));
-				nearestFaces.put(rect, nearestFace);
+				Double smallestDistance = distances.get(0);
+				if (ALLOW_ALL_DISTANCES || smallestDistance < DISTANCE_TRESHOLD) {
+					Face nearestFace = distanceMap.get(smallestDistance);
+					nearestFaces.put(rect, nearestFace);
+				} else {
+					nearestFaces.put(rect, null);
+				}
 			}
 		}
 		return nearestFaces;
