@@ -75,18 +75,21 @@ public class MovementChart extends JPanel {
 
 	public void refresh(Map<MyColor, Point> values) {
 		for (MyColor color : values.keySet()) {
+			Point value = values.get(color);
+			
 			VectorSeries series = null;
+			
 			try {
 				series = getSeries(color);
 			} catch (org.jfree.data.UnknownKeyException e) {
-
 			}
-			Point value = values.get(color);
+			
 			if (series == null) {
 				addNewSeries(color, value);
 			} else {
 				addToSeries(series, value);
 			}
+			
 			Long now = System.currentTimeMillis();
 			seriesStalenes.put(color, now);
 		}
@@ -129,7 +132,7 @@ public class MovementChart extends JPanel {
 			if (age > SERIES_AGE_TRESHOLD) {
 				try {
 					VectorSeries series = getSeries(color);
-					seriesCollection.removeSeries(series);
+					series.clear();
 				} catch (org.jfree.data.UnknownKeyException e) {
 
 				}

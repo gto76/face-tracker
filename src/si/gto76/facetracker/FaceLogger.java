@@ -223,7 +223,6 @@ public class FaceLogger {
 		double dg = randomColor.getGreen() - backgroundColor.getGreen();
 		double db = randomColor.getBlue() - backgroundColor.getBlue();
 		int distance = (int) Math.sqrt(Math.pow(dr, 2) + Math.pow(dg, 2) + Math.pow(db, 2));
-		System.out.println("#### " + distance + " c1 " + randomColor + " c2 " + backgroundColor);
 		return distance;
 	}
 

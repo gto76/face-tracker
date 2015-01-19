@@ -132,6 +132,9 @@ public class PositionChart extends JPanel {
 
 	private void setColor(Series series, MyColor color, XYSeriesCollection dataset, int datasetIndex) {
 		int seriesIndex = dataset.getSeriesIndex(color);
+		if (seriesIndex == -1) {
+			System.out.println("#### setColor fails to get series index!!!!!!!!! color "+color);
+		}
 		XYItemRenderer renderer = plot.getRenderer(datasetIndex);
 		renderer.setSeriesPaint(seriesIndex, color.c);
 	}
@@ -143,15 +146,17 @@ public class PositionChart extends JPanel {
 			long age = now - lastSeen;
 			if (age > SERIES_AGE_TRESHOLD) {
 				try {
-					XYSeries series = seriesCollection.getSeries(color);
-					seriesCollection.removeSeries(series);
-					// also remove the dot series
-					XYSeries dSeries = seriesCollection.getSeries(color);
-					seriesCollection.removeSeries(dSeries);
+					removeSeriesFromCollection(color, seriesCollection);
+					removeSeriesFromCollection(color, dotSeriesCollection);
 				} catch (org.jfree.data.UnknownKeyException e) {
 
 				}
 			}
 		}
+	}
+	
+	private void removeSeriesFromCollection(MyColor color, XYSeriesCollection collection) {
+		XYSeries series = collection.getSeries(color);
+		series.clear();
 	}
 }
