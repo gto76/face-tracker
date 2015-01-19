@@ -24,7 +24,7 @@ import si.gto76.facetracker.MyColor;
 public class CounterChart extends JPanel  {
 	private static final String TITLE = "Counter";
 	
-	private static int RANGE_SECONDS = 30;
+	private static int RANGE_SECONDS = 20;
 	private static double RANGE_FACES = 3.0;
 
 	/** The time series data. */

@@ -25,6 +25,9 @@ public class FaceLogger {
 	// deletes faces older than limit
 	public static long AGE_LIMIT_MILLIS = 2000;
 	
+	// does not show faces older than limit
+	public static long AGE_LIMIT_MILLIS_SHOW = 1000;
+
 	// wheights for calculating distances
 	private static final double TIME_WEIGHT = 0.1;
 	private static final double AREA_WEIGHT = 0.002;
@@ -32,12 +35,11 @@ public class FaceLogger {
 	// sizefactor reduces distances between larger objects
 	private static final boolean USE_SIZE_FACTOR = true;
 	private static final double SIZE_FACTOR = 10000;
-	
+
 	// If set to false only rectangles with lower distance to the face then treshold
 	// will be concidered to belong to a face
 	private static final boolean ALLOW_ALL_DISTANCES = false;
 	private static final Double DISTANCE_TRESHOLD = 200.0;
-
 
 	private static final Color BACKGROUND_COLOR = new Color(190, 190, 190);
 	private static final int REQUIRED_COLOR_DISTANCE = 90;
@@ -132,16 +134,15 @@ public class FaceLogger {
 		return nearestFaces;
 	}
 
-	
 	private Double getDistance(Rect rect, Face face) {
 		Point rectCent = Util.getCentroide(rect);
 		Point faceCent = face.getCentroid();
 		double sizeFactor = 1;
 		if (USE_SIZE_FACTOR) {
-			sizeFactor = rect.area()/SIZE_FACTOR;
+			sizeFactor = rect.area() / SIZE_FACTOR;
 		}
-		double dx = (rectCent.x - faceCent.x)/sizeFactor;
-		double dy = (rectCent.y - faceCent.y)/sizeFactor;
+		double dx = (rectCent.x - faceCent.x) / sizeFactor;
+		double dy = (rectCent.y - faceCent.y) / sizeFactor;
 		double dz = (rect.area() - face.getRect().area()) * AREA_WEIGHT;
 		double dt = face.getAdjustedTimeSinceLost();
 		return Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2) + Math.pow(dz, 2) + Math.pow(dt, 2));
@@ -270,9 +271,10 @@ public class FaceLogger {
 	public Map<MyColor, Double> getFaceSizes() {
 		Map<MyColor, Double> sizes = new HashMap<MyColor, Double>();
 		for (Face face : faces) {
-			if (face.iterations > 0) {
-				sizes.put(face.color, face.getRect().area());
+			if (shouldBeHidden(face)) {
+				continue;
 			}
+			sizes.put(face.color, face.getRect().area());
 		}
 		return sizes;
 	}
@@ -280,9 +282,10 @@ public class FaceLogger {
 	public Map<MyColor, Point> getFacePositions() {
 		Map<MyColor, Point> positions = new HashMap<MyColor, Point>();
 		for (Face face : faces) {
-			if (face.iterations > 0) {
-				positions.put(face.color, face.getCentroid());
+			if (shouldBeHidden(face)) {
+				continue;
 			}
+			positions.put(face.color, face.getCentroid());
 		}
 		return positions;
 	}
@@ -290,16 +293,17 @@ public class FaceLogger {
 	public Map<MyColor, Point> getFaceMovements() {
 		Map<MyColor, Point> movements = new HashMap<MyColor, Point>();
 		for (Face face : faces) {
-			if (face.iterations > 0) {
-				movements.put(face.color, face.getDirection());
+			if (shouldBeHidden(face)) {
+				continue;
 			}
+			movements.put(face.color, face.getDirection());
 		}
 		return movements;
 	}
 
 	public void markFaces(Mat image) {
 		for (Face face : faces) {
-			if (face.iterations < 1) {
+			if (shouldBeHidden(face)) {
 				continue;
 			}
 			Rect rect = face.rect;
@@ -308,6 +312,10 @@ public class FaceLogger {
 			Imgproc.rectangle(image, new Point(rect.x, rect.y), new Point(rect.x + rect.width, rect.y
 					+ rect.height), colorScalar);
 		}
+	}
+	
+	private boolean shouldBeHidden(Face face) {
+		return face.iterations < 1 || face.getMillisSinceLost() > 1000;
 	}
 
 	// ////////////////////////
@@ -350,12 +358,10 @@ public class FaceLogger {
 		}
 
 		public long getMillisSinceLost() {
-			//long currentTimeMillis = System.currentTimeMillis();
 			return lastCycleTime - lastSeen;
 		}
 
 		public long getAge() {
-			//long currentTimeMillis = System.currentTimeMillis();
 			return lastCycleTime - created;
 		}
 

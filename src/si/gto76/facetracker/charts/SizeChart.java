@@ -27,7 +27,7 @@ import si.gto76.facetracker.MyColor;
 public class SizeChart extends JPanel  {
 	private static final String TITLE = "Sizes";
 	
-	private static int RANGE_SECONDS = 30;
+	private static int RANGE_SECONDS = 20;
 	private static double RANGE_SIZE = 40000.0;
 
 	JFreeChart chart;
