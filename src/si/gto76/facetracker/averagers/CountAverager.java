@@ -1,8 +1,15 @@
 package si.gto76.facetracker.averagers;
 
+import java.awt.Color;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
+
+import si.gto76.facetracker.MyColor;
 
 public class CountAverager extends Averager<Integer> {
+	private static final MyColor MY_COLOR = new MyColor(Color.BLACK);
+	private final Map<MyColor,Integer> myMap = new HashMap<MyColor, Integer>();
 
 	public CountAverager(int windowSize) {
 		super(windowSize);
@@ -17,12 +24,15 @@ public class CountAverager extends Averager<Integer> {
 			sum += value;
 		}
 		return (int) (long) Math.round((double)sum /size);
-		
-//		double average = 0;
-//		for (int i = 1; i <= size; i++) {
-//			double factor = (2.0 * i - 1) / (2 * size);
-//			average += factor * values.get(i - 1);
-//		}
-//		return (int) (long) Math.round(average * (2.0/size));
 	}
+	
+	
+	public Integer tickInteger(Integer value) {
+		myMap.put(MY_COLOR, value);
+		updateValues(myMap);
+		Map<MyColor, Integer> averages = getAverages();
+		moveWindow();
+		return averages.get(MY_COLOR);
+	}
+	
 }

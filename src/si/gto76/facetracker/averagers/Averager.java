@@ -36,7 +36,7 @@ public abstract class Averager<T> {
 	// // UPDATE VALUES ////
 	// /////////////////////
 
-	private void updateValues(Map<MyColor, T> newValues) {
+	protected void updateValues(Map<MyColor, T> newValues) {
 		Set<MyColor> allTheColors = new HashSet<MyColor>(windowValues.keySet());
 		allTheColors.addAll(newValues.keySet());
 
@@ -82,7 +82,7 @@ public abstract class Averager<T> {
 	// // GET AVERAGES ////
 	// ////////////////////
 
-	private Map<MyColor, T> getAverages() {
+	protected Map<MyColor, T> getAverages() {
 		Map<MyColor, T> averages = new HashMap<MyColor, T>();
 
 		Iterator<Entry<MyColor, LinkedList<T>>> iter = windowValues.entrySet().iterator();
@@ -125,7 +125,7 @@ public abstract class Averager<T> {
 	// // MOVE WINDOW ////
 	// ///////////////////
 	
-	private void moveWindow() {
+	protected void moveWindow() {
 		for (LinkedList<T> values: windowValues.values()) {
 			values.removeFirst();
 		}

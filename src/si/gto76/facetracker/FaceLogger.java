@@ -246,7 +246,7 @@ public class FaceLogger {
 			// do not include the newbies, and include the oldies that just got droped
 			boolean activeNotNoob = face.lastSeen == lastCycleTime && face.iterations != 0;
 			boolean nonactiveFreshman = face.getMillisSinceLost() < 10 && face.iterations > 10;
-			boolean nonactiveVeteran = face.getMillisSinceLost() < 500 && face.getAge() > 4000;
+			boolean nonactiveVeteran = face.getMillisSinceLost() < 1500 && face.getAge() > 3000;
 			if (activeNotNoob || nonactiveFreshman || nonactiveVeteran) {
 				noOfFaces++;
 			}
@@ -334,13 +334,13 @@ public class FaceLogger {
 		}
 
 		public long getMillisSinceLost() {
-			long currentTimeMillis = System.currentTimeMillis();
-			return currentTimeMillis - lastSeen;
+			//long currentTimeMillis = System.currentTimeMillis();
+			return lastCycleTime - lastSeen;
 		}
 
 		public long getAge() {
-			long currentTimeMillis = System.currentTimeMillis();
-			return currentTimeMillis - created;
+			//long currentTimeMillis = System.currentTimeMillis();
+			return lastCycleTime - created;
 		}
 
 		/**

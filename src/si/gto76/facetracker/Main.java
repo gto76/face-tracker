@@ -19,6 +19,7 @@ import org.opencv.videoio.VideoCapture;
 
 import si.gto76.facetracker.averagers.CountAverager;
 import si.gto76.facetracker.averagers.MovementAverager;
+import si.gto76.facetracker.averagers.PositionAverager;
 import si.gto76.facetracker.averagers.SizeAverager;
 import si.gto76.facetracker.charts.PositionChart;
 import si.gto76.facetracker.charts.CounterChart;
@@ -33,7 +34,8 @@ public class Main extends JPanel {
 
 	private static final int SIZE_WINDOW = 10;
 	private static final int MOVEMENT_WINDOW = 3;
-	private static final int NUMBER_WINDOW = 10;
+	private static final int POSITION_WINDOW = 2;
+	private static final int NUMBER_WINDOW = 5;
 
 	private static final double FPS = 24;
 	private static final double MSPF = 1000/FPS;
@@ -49,6 +51,7 @@ public class Main extends JPanel {
 	// Classes that average the data before its send to the charts
 	SizeAverager faceSizesAverager = new SizeAverager(SIZE_WINDOW);
 	MovementAverager faceMovementAverager = new MovementAverager(MOVEMENT_WINDOW);
+	PositionAverager facePositionAverager = new PositionAverager(POSITION_WINDOW);
 	CountAverager faceNumberAverager = new CountAverager(NUMBER_WINDOW);
 
 	// Charts
@@ -204,9 +207,10 @@ public class Main extends JPanel {
 
 		return faces;
 	}
-
+	
 	private void updateCharts() {
 		int noOfFaces = faceLogger.getNoOfFaces();
+		noOfFaces = faceNumberAverager.tickInteger(noOfFaces);
 		noOfFacesChart.refresh(noOfFaces);
 
 		Map<MyColor, Double> faceSizes = faceLogger.getFaceSizes();
@@ -214,6 +218,7 @@ public class Main extends JPanel {
 		sizeChart.refresh(faceSizes);
 
 		Map<MyColor, Point> facePositions = faceLogger.getFacePositions();
+		facePositions = facePositionAverager.tick(facePositions);
 		positionChart.refresh(facePositions);
 
 		Map<MyColor, Point> faceMovements = faceLogger.getFaceMovements();
