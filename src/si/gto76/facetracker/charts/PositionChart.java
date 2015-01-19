@@ -1,6 +1,7 @@
 package si.gto76.facetracker.charts;
 
 import java.awt.Color;
+import java.awt.Shape;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,11 +13,14 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
 import org.jfree.chart.renderer.xy.XYDotRenderer;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.general.Series;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
+import org.jfree.util.ShapeUtilities;
 import org.opencv.core.Point;
 
 import si.gto76.facetracker.MyColor;
@@ -34,7 +38,12 @@ public class PositionChart extends JPanel {
 	JFreeChart chart;
 	XYPlot plot;
 	final XYDotRenderer dotRenderer;
+
 	final XYSeriesCollection seriesCollection = new XYSeriesCollection();
+	final XYSeriesCollection dotSeriesCollection = new XYSeriesCollection();
+	// dataset indexes
+	final int LINES_INDEX = 0;
+	final int DOTS_INDEX = 1;
 
 	final Map<MyColor, Long> seriesStalenes = new HashMap<MyColor, Long>();
 
@@ -42,27 +51,31 @@ public class PositionChart extends JPanel {
 		super();
 		this.width = width;
 		this.height = height;
-		
-		dotRenderer = new XYDotRenderer();
-		dotRenderer.setDotHeight(DOT_SIZE);
-		dotRenderer.setDotWidth(DOT_SIZE);
 
 		createChart(seriesCollection, width, height);
 		chart.removeLegend();
+
+		// add two diferent datasets, one for lines and other for dots
+		dotRenderer = new XYDotRenderer();
+		dotRenderer.setDotHeight(DOT_SIZE);
+		dotRenderer.setDotWidth(DOT_SIZE);
+		plot.setDataset(LINES_INDEX, seriesCollection);
+		plot.setDataset(DOTS_INDEX, dotSeriesCollection);
+		plot.setRenderer(DOTS_INDEX, dotRenderer);
 
 		final ChartPanel chartPanel = new ChartPanel(chart);
 		chartPanel.setMinimumDrawWidth(0);
 		chartPanel.setMinimumDrawHeight(0);
 		chartPanel.setMaximumDrawWidth(1920);
 		chartPanel.setMaximumDrawHeight(1200);
-		
+
 		this.add(chartPanel);
 		chartPanel.setPreferredSize(new java.awt.Dimension(350, 270));
 	}
 
 	private void createChart(final XYSeriesCollection dataset, int width, int height) {
-		chart = ChartFactory.createXYLineChart(TITLE, "X", "Y", dataset, 
-					PlotOrientation.VERTICAL, true, true, false );
+		chart = ChartFactory.createXYLineChart(TITLE, "X", "Y", dataset, PlotOrientation.VERTICAL, true,
+				true, false);
 		plot = chart.getXYPlot();
 		ValueAxis axis = plot.getDomainAxis();
 		axis.setAutoRange(true);
@@ -74,66 +87,52 @@ public class PositionChart extends JPanel {
 
 	public void refresh(Map<MyColor, Point> values) {
 		for (MyColor color : values.keySet()) {
+			Point value = values.get(color);
+
 			XYSeries series = null;
 			XYSeries dotSeries = null;
 
-			//System.out.println("#### Color "+color);
-			//System.out.println("#### Dot color "+getDotColor(color));
-			
 			try {
 				series = seriesCollection.getSeries(color);
 			} catch (org.jfree.data.UnknownKeyException e) {
-				//System.out.println("#### Series key exception "+e);
 			}
+
 			try {
-				dotSeries = seriesCollection.getSeries(getDotColor(color));
+				dotSeries = dotSeriesCollection.getSeries(color);
 			} catch (org.jfree.data.UnknownKeyException e) {
-				//System.out.println("#### Dot series key exception "+e);
 			}
-			Point value = values.get(color);
-			
+
 			if (series == null) {
-				//System.out.println("#### series does not exist");
-				addNewSeries(color, value);
+				addNewSeries(color, value, seriesCollection, LINES_INDEX);
 			} else {
-				//System.out.println("#### series exists");
 				series.add(value.x, height - value.y);
 			}
-			
+
 			if (dotSeries == null) {
-				//System.out.println("#### dotseries does not exist");
-				MyColor dotColor = getDotColor(color);
-				addNewSeries(dotColor, value);
-				//int seriesIndex = seriesCollection.getSeriesIndex(dotColor);
-				//plot.setRenderer(seriesIndex, dotRenderer);
+				addNewSeries(color, value, dotSeriesCollection, DOTS_INDEX);
 			} else {
-				//System.out.println("#### dotseries exists");
 				dotSeries.clear();
 				dotSeries.add(value.x, height - value.y);
 			}
-			
+
 			Long now = System.currentTimeMillis();
 			seriesStalenes.put(color, now);
 		}
 		removeUnusedSeries();
 	}
-	
-	private MyColor getDotColor(MyColor color) {
-		return new MyColor(new Color(color.c.getRGB()-1));
-	}
 
-	private void addNewSeries(MyColor color, Point value) {
+	private void addNewSeries(MyColor color, Point value, XYSeriesCollection dataset, int datasetIndex) {
 		XYSeries series = new XYSeries("test", false);
 		series.setMaximumItemCount(MAXIMUM_VALUES);
 		series.setKey(color);
 		series.add(value.x, height - value.y);
-		seriesCollection.addSeries(series);
-		setColor(series, color);
+		dataset.addSeries(series);
+		setColor(series, color, dataset, datasetIndex);
 	}
-	
-	private void setColor(Series series, MyColor color) {
-		int seriesIndex = seriesCollection.getSeriesIndex(color);
-		XYItemRenderer renderer = plot.getRenderer();
+
+	private void setColor(Series series, MyColor color, XYSeriesCollection dataset, int datasetIndex) {
+		int seriesIndex = dataset.getSeriesIndex(color);
+		XYItemRenderer renderer = plot.getRenderer(datasetIndex);
 		renderer.setSeriesPaint(seriesIndex, color.c);
 	}
 
@@ -147,7 +146,7 @@ public class PositionChart extends JPanel {
 					XYSeries series = seriesCollection.getSeries(color);
 					seriesCollection.removeSeries(series);
 					// also remove the dot series
-					XYSeries dSeries = seriesCollection.getSeries(getDotColor(color));
+					XYSeries dSeries = seriesCollection.getSeries(color);
 					seriesCollection.removeSeries(dSeries);
 				} catch (org.jfree.data.UnknownKeyException e) {
 

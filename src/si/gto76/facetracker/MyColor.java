@@ -15,6 +15,12 @@ public class MyColor implements Comparable<MyColor> {
 		Integer otherRGB = other.c.getRGB();
 		return thisRGB.compareTo(otherRGB);
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		MyColor other = (MyColor) obj;
+		return this.compareTo(other) == 0;
+	}
 
 	@Override
 	public String toString() {

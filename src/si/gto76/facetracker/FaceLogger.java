@@ -25,7 +25,7 @@ public class FaceLogger {
 	public static long AGE_LIMIT_MILLIS = 2000;
 	private static final double TIME_WEIGHT = 0.1;
 	private static final double AREA_WEIGHT = 0.002;
-	
+
 	private static final Color BACKGROUND_COLOR = new Color(190, 190, 190);
 	private static final int REQUIRED_COLOR_DISTANCE = 90;
 
@@ -47,7 +47,7 @@ public class FaceLogger {
 		enforceSingleFacePerRect(nearestFaces);
 		createNewFacesForRectsWithoutAndUpdateOldOnes(nearestFaces);
 		removeGlitchFaces();
-		//printAllFaces();
+		// printAllFaces();
 	}
 
 	private void removeOldFaces() {
@@ -203,22 +203,17 @@ public class FaceLogger {
 		}
 	}
 
-
 	private MyColor getRandomColor() {
 		float r = RAND.nextFloat();
 		float g = RAND.nextFloat();
 		float b = RAND.nextFloat();
 		Color randomColor = new Color(r, g, b);
+		// until it gets enough contrasting color
 		while (getDistance(randomColor, BACKGROUND_COLOR) < REQUIRED_COLOR_DISTANCE) {
 			r = RAND.nextFloat();
 			g = RAND.nextFloat();
 			b = RAND.nextFloat();
 			randomColor = new Color(r, g, b);
-		}
-		
-		// disalove pitch black, because of a hack in PositionChart
-		if (randomColor.getRGB() == 0) {
-			randomColor = new Color(1);
 		}
 		return new MyColor(randomColor);
 	}
@@ -228,10 +223,10 @@ public class FaceLogger {
 		double dg = randomColor.getGreen() - backgroundColor.getGreen();
 		double db = randomColor.getBlue() - backgroundColor.getBlue();
 		int distance = (int) Math.sqrt(Math.pow(dr, 2) + Math.pow(dg, 2) + Math.pow(db, 2));
-		System.out.println("#### "+distance+ " c1 "+ randomColor+ " c2 "+ backgroundColor);
+		System.out.println("#### " + distance + " c1 " + randomColor + " c2 " + backgroundColor);
 		return distance;
 	}
-	
+
 	// ////////////////////////////
 	// ///// PUBLIC GETTERS ///////
 	// ////////////////////////////
@@ -279,9 +274,9 @@ public class FaceLogger {
 		}
 		return movements;
 	}
-	
+
 	public void markFaces(Mat image) {
-		for (Face face: faces) {
+		for (Face face : faces) {
 			Rect rect = face.rect;
 			Color color = face.color.c;
 			Scalar colorScalar = new Scalar(color.getBlue(), color.getGreen(), color.getRed(), 255);
@@ -289,7 +284,7 @@ public class FaceLogger {
 					+ rect.height), colorScalar);
 		}
 	}
-	
+
 	// ////////////////////////
 	// ///// FACE CLASS ///////
 	// ////////////////////////
@@ -338,16 +333,16 @@ public class FaceLogger {
 			long currentTimeMillis = System.currentTimeMillis();
 			return currentTimeMillis - created;
 		}
-		
+
 		/**
-		 *  Milliseconds since lost adjusted
+		 * Milliseconds since lost adjusted
 		 */
 		public double getAdjustedTimeSinceLost() {
 			return (lastCycleTime - lastSeen) * TIME_WEIGHT;
 		}
-		
+
 		/**
-		 *  Rectangle area size adjusted
+		 * Rectangle area size adjusted
 		 */
 		public double getAdjustedSize() {
 			return rect.area() * AREA_WEIGHT;
