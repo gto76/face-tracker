@@ -14,14 +14,20 @@ import java.util.Set;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
 import org.opencv.core.Point;
+import org.opencv.core.Point3;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
+
+import com.orsoncharts.graphics3d.Point3D;
 
 public class FaceLogger {
 	public static long AGE_LIMIT_MILLIS = 2000;
 	private static final double TIME_WEIGHT = 0.1;
 	private static final double AREA_WEIGHT = 0.002;
+	
+	private static final Color BACKGROUND_COLOR = new Color(190, 190, 190);
+	private static final int REQUIRED_COLOR_DISTANCE = 90;
 
 	List<Face> faces = new ArrayList<Face>();
 	private long lastCycleTime = 0;
@@ -197,14 +203,35 @@ public class FaceLogger {
 		}
 	}
 
+
 	private MyColor getRandomColor() {
 		float r = RAND.nextFloat();
 		float g = RAND.nextFloat();
 		float b = RAND.nextFloat();
 		Color randomColor = new Color(r, g, b);
+		while (getDistance(randomColor, BACKGROUND_COLOR) < REQUIRED_COLOR_DISTANCE) {
+			r = RAND.nextFloat();
+			g = RAND.nextFloat();
+			b = RAND.nextFloat();
+			randomColor = new Color(r, g, b);
+		}
+		
+		// disalove pitch black, because of a hack in PositionChart
+		if (randomColor.getRGB() == 0) {
+			randomColor = new Color(1);
+		}
 		return new MyColor(randomColor);
 	}
 
+	private int getDistance(Color randomColor, Color backgroundColor) {
+		double dr = randomColor.getRed() - backgroundColor.getRed();
+		double dg = randomColor.getGreen() - backgroundColor.getGreen();
+		double db = randomColor.getBlue() - backgroundColor.getBlue();
+		int distance = (int) Math.sqrt(Math.pow(dr, 2) + Math.pow(dg, 2) + Math.pow(db, 2));
+		System.out.println("#### "+distance+ " c1 "+ randomColor+ " c2 "+ backgroundColor);
+		return distance;
+	}
+	
 	// ////////////////////////////
 	// ///// PUBLIC GETTERS ///////
 	// ////////////////////////////

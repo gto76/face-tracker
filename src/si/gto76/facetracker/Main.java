@@ -35,6 +35,14 @@ public class Main extends JPanel {
 	private static final int MOVEMENT_WINDOW = 3;
 	private static final int NUMBER_WINDOW = 10;
 
+	private static final double FPS = 24;
+	private static final double MSPF = 1000/FPS;
+	private static final boolean SKIP_FRAMES = false;
+
+	VideoCapture capture;
+	
+	boolean fromFile = false;
+
 	// Class that stores face locations...
 	FaceLogger faceLogger = new FaceLogger();
 
@@ -73,11 +81,11 @@ public class Main extends JPanel {
 		JFrame frame = getVideoFrame(display);
 
 		// Set capture device
-		VideoCapture capture;
 		if (path.equals("0")) {
 			capture = new VideoCapture(0);
 		} else {
 			capture = new VideoCapture(path);
+			fromFile = true;
 		}
 
 		// Check capture device
@@ -97,10 +105,31 @@ public class Main extends JPanel {
 		// Open stats window and adjust main window
 		startCharts(lastFrame.width(), lastFrame.height());
 		frame.setSize(lastFrame.width() + 40, lastFrame.height() + 60);
+		
 
 		// Start main loop
+		long startTime = System.currentTimeMillis();
+		long frameNumber = 0;
 		while (mainLoop(capture, display)) {
+			if (SKIP_FRAMES) {
+				int skipNumber = getSkipNumber(startTime, frameNumber);
+				for (int i = 0; i < skipNumber; i++) {
+					boolean stillRunning = capture.read(new Mat());
+					if (!stillRunning) {
+						return;
+					}
+				}
+				frameNumber += skipNumber;
+			}
 		}
+	}
+
+	private int getSkipNumber(long startTime, long frameNumber) {
+		long now = System.currentTimeMillis();
+		long runningTime = now - startTime;
+		long videoTime = (long) (frameNumber*MSPF);
+		long lag = runningTime - videoTime;
+		return (int) (lag / MSPF);
 	}
 
 	private static JFrame getVideoFrame(Display display) {
@@ -125,9 +154,9 @@ public class Main extends JPanel {
 		positionAndVector.add(positionChart);
 		positionAndVector.add(movementChart);
 
-		chartPanelsWithSizes.add((JPanel) noOfFacesChart);
-		chartPanelsWithSizes.add((JPanel) sizeChart);
 		chartPanelsWithSizes.add(positionAndVector);
+		chartPanelsWithSizes.add((JPanel) sizeChart);
+		chartPanelsWithSizes.add((JPanel) noOfFacesChart);
 
 		ChartsWindow chartsWindow = new ChartsWindow("Stats", chartPanelsWithSizes);
 		chartsWindow.pack();
@@ -140,23 +169,23 @@ public class Main extends JPanel {
 	// ///////////////////
 
 	private boolean mainLoop(VideoCapture capture, Display display) {
-		Mat lastFrame = new Mat();
-		capture.read(lastFrame);
-		if (lastFrame.empty()) {
+		Mat frame = new Mat();
+		capture.read(frame);
+		if (frame.empty()) {
 			System.out.println(" --(!) No captured frame -- Break!");
 			return false;
 		}
 
 		// 1. Apply the classifier to the captured image
-		MatOfRect faces = detect(lastFrame);
+		MatOfRect faces = detect(frame);
 		// 2. Analyze data
 		faceLogger.tick(faces);
 		// 3. Update the charts
 		updateCharts();
 		// 4. Mark faces on image
-		faceLogger.markFaces(lastFrame);
+		faceLogger.markFaces(frame);
 		// 5. Display the image
-		display.MatToBufferedImage(lastFrame);
+		display.MatToBufferedImage(frame);
 		display.repaint();
 
 		return true;

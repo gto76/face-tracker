@@ -16,4 +16,8 @@ public class MyColor implements Comparable<MyColor> {
 		return thisRGB.compareTo(otherRGB);
 	}
 
+	@Override
+	public String toString() {
+		return c.toString();
+	}
 }

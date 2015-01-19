@@ -1,5 +1,7 @@
 package si.gto76.facetracker.charts;
 
+import java.awt.Color;
+
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
@@ -9,10 +11,15 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.XYItemRenderer;
+import org.jfree.data.general.Series;
 import org.jfree.data.time.Millisecond;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.data.xy.XYDataset;
+import org.jfree.data.xy.XYSeries;
+
+import si.gto76.facetracker.MyColor;
 
 public class CounterChart extends JPanel  {
 	private static final String TITLE = "Counter";
@@ -59,14 +66,16 @@ public class CounterChart extends JPanel  {
 		axisX.setRange(0.0, RANGE_FACES);
 		axisX.setAutoRangeIncludesZero(true);
 		axisX.setAutoRange(true);
+
+		XYItemRenderer renderer = plot.getRenderer();
+		renderer.setPaint(Color.BLACK);
 		
 		return result;
 	}
 
+
 	public void refresh(double value) {
 		this.lastValue = value;
-		final Millisecond now = new Millisecond();
-		//System.out.println("Now = " + now.toString());
 		this.series.add(new Millisecond(), this.lastValue);
 	}
 
