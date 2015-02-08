@@ -3,7 +3,7 @@ Face tracking java app using openCV
 
 How to run
 ----------
-App uses OpenCv 3.0 and JFreeChart 1.0.19 libraries. At the top of the `Main.java` file, the paths to the OpenCV components need to be set. To get input video from a webcam use input parameter `0`, or use a path to the video file.
+App uses [OpenCv 3.0.0] (http://sourceforge.net/projects/opencvlibrary/files/opencv-win/3.0.0-beta/opencv-3.0.0-beta.exe/download) and [JFreeChart 1.0.19] (http://sourceforge.net/projects/jfreechart/files/1.%20JFreeChart/1.0.19/jfreechart-1.0.19.zip/download) libraries. At the top of the `Main.java` file, the paths to the OpenCV components need to be set. To get input video from a webcam use input parameter `0`, or use a path to the video file.
 
 Functionalities
 ---------------
