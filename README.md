@@ -1,28 +1,15 @@
 # Face Tracker
-face tracking using openCV
+Face tracking java app using openCV
 
-Napotki za zagon
-----------------
-Aplikacija uporablja knjižnici OpenJS 3.0 in JFreeChart 1.0.19.
-Na začetku datoteke Main.java je potrebno spremeniti poti do OpenJS 
-komponent. Za zagon kamere podamo kot vhodni parameter število 0, 
-za predvajanje datoteke pa pot do nje.
+How to run
+----------
+App uses OpenCv 3.0 and JFreeChart 1.0.19 libraries. At the top of the `Main.java` file, the paths to the OpenCV components need to be set. To get input video from a webcam use input parameter `0`, or use a path to the video file.
 
-Opis funkcionalnosti
---------------------
-Aplikacija v realnem času prikazuje statistike videa v obliki grafov,
-in sicer: pozicijo, vektorje premikov, velikosti ter število obrazov.
+Functionalities
+---------------
+App is displaying in real time the stats of the video in form of the graphs, specifically the positions, movement vectors, sizes and number of the faces.
 
-Opis delovanja
---------------
-main() metoda razreda Main po inicializaciji vseh potrebnih komponent 
-začne z izvajanjem mainLoop() metode. Ta metoda v vsakem ciklu prvo
-zajame sliko ter jo pošlje klasifikatorju, ki ji vrne nazaj množico
-pravokotnikov. Te pravokotnike nato pošlje razredu FaceLogger, ki
-hrani pozicije obrazov. Vsak pravokotnik se ali dodeli že obstoječemu
-objektu Face, ali pa se po potrebi ustvari novi (če je pravokotnik
-preveč oddaljen on že obstoječih obrazov). Nato se kliče metoda
-updateCharts(), ki pobere sveže podatke iz faceLoggerja, jih
-povpreči, ter pošlje grafom. Nato še pošlje na začetku pridobljeno 
-sliko facelogerju da ji le-ta doriše pravokotnike, ter pošlje to sliko
-na izhod.   
+How it works
+------------
+`main()` function of the class `Main`, after the initialization of all the necessary components, starts with execution of the `mainLoop()` method. This method in every circle first captures the frame and sends it to the classificator, that returns back a set of rectangles. This rectangles then get sent to a class called `FaceLogger`, that stores locations of the faces. Every rectangle is either assigned to an existing face, or the new face is created (if rectangle is too distant from the existing faces). After that the `updateCharts()` method gets called, that takes updated data from the `faceLogger`, averages it, and sends it to the charts. After that it sends the acquired frame to the `faceLogger`, so it can draw the rectangles on the frame, and finally the frame gets sent to the screen.
+
