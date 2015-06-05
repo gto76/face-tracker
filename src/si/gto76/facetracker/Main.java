@@ -28,9 +28,9 @@ import si.gto76.facetracker.charts.MovementChart;
 
 public class Main extends JPanel {
 
-	public static final String LIB_OPENCV_JAVA = "D:\\DESKTOP-DATA\\home\\downloads\\opencv\\opencv\\build\\java\\x64\\opencv_java300.dll";
-	public static final String FFMPEG = "D:\\DESKTOP-DATA\\home\\downloads\\opencv\\opencv\\build\\x64\\vc10\\bin\\opencv_ffmpeg300_64.dll";
-	private static final String CASCADE_PATH = "D:\\DESKTOP-DATA\\home\\downloads\\opencv\\opencv\\sources\\data\\lbpcascades\\lbpcascade_frontalface.xml";
+	public static final String LIB_OPENCV_JAVA = "E:\\DESKTOP-DATA\\home\\downloads\\opencv\\opencv\\build\\java\\x64\\opencv_java300.dll";
+	public static final String FFMPEG = "E:\\DESKTOP-DATA\\home\\downloads\\opencv\\opencv\\build\\x64\\vc10\\bin\\opencv_ffmpeg300_64.dll";
+	private static final String CASCADE_PATH = "E:\\DESKTOP-DATA\\home\\downloads\\opencv\\opencv\\sources\\data\\lbpcascades\\lbpcascade_frontalface.xml";
 	private CascadeClassifier face_cascade;
 
 	private static final int SIZE_WINDOW = 10;

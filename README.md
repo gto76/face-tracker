@@ -1,5 +1,5 @@
 # Face Tracker
-Face tracking java app using OpenCV
+Face tracking Java app using OpenCV
 
 ![Screenshot](doc/screenshot-01.png/)
 ![Screenshot](doc/screenshot-02.png/)
@@ -14,5 +14,5 @@ App is displaying in real time the stats of the video in form of the graphs, spe
 
 How it works
 ------------
-`main()` function of the class `Main`, after the initialization of all the necessary components, starts with execution of the `mainLoop()` method. This method in every circle first captures the frame and sends it to the classificator, that returns back a set of rectangles. This rectangles then get sent to a class called `FaceLogger`, that stores locations of the faces. Every rectangle is either assigned to an existing face, or the new face is created (if rectangle is too distant from the existing faces). After that the `updateCharts()` method gets called, that takes updated data from the `faceLogger`, averages it, and sends it to the charts. After that it sends the acquired frame to the `faceLogger`, so it can draw the rectangles on the frame, and finally the frame gets sent to the screen.
+`main()` function of the class `Main`, after the initialization of all the necessary components, starts with execution of the `mainLoop()` method. This method in every circle first captures the frame and sends it to the classifier, that returns back a set of rectangles. This rectangles then get sent to a class called `FaceLogger`, that stores locations of the faces. Every rectangle is either assigned to an existing face, or the new face is created (if rectangle is too distant from the existing faces). After that the `updateCharts()` method gets called, that takes updated data from the `faceLogger`, averages it, and sends it to the charts. After that it sends the acquired frame to the `faceLogger`, so it can draw the rectangles on the frame, and finally the frame gets sent to the screen.
 
