@@ -1,5 +1,7 @@
-# Face Tracker
-Face tracking Java app using OpenCV
+Face Tracker
+============
+
+#### Face tracking Java app using OpenCV
 
 ![Screenshot](doc/screenshot-01.png/)
 ![Screenshot](doc/screenshot-02.png/)
